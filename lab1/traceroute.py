@@ -108,9 +108,13 @@ def traceroute(sendsock: util.Socket, recvsock: util.Socket, ip: str) \
     """
 
     # TODO Add your implementation
-    for ttl in range(1, TRACEROUTE_MAX_TTL+1):
-        util.print_result([], ttl)
-    return []
+    # for ttl in range(1, TRACEROUTE_MAX_TTL+1):
+    #     util.print_result([], ttl)
+    # return []
+    sendsock.set_ttl(30)
+    sendsock.sendto("Potato".encode(), (ip, 80))
+    buf, address = recvsock.recvfrom()
+    print(f"Packet bytes: {buf.hex()}\n")
 
 
 if __name__ == '__main__':
