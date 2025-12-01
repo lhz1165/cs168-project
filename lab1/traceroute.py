@@ -44,7 +44,7 @@ class IPv4:
         self.header_len = int(bitstring[4:8], base=2)
         self.tos = buffer[1]
         self.length = int.from_bytes(buffer[2:4], "big")
-        self.id = int.from_bytes(buffer[4:6], "big")
+        self.id = int.from_bytes(bu·ffer[4:6], "big")
         self.flags = int(bitstring[48:48 + 3], base=2)
         self.frag_offset = util.ntohs(int(bitstring[51:64], base=2))
         self.ttl = buffer[8]
@@ -111,9 +111,10 @@ def check_ttl_expired(icmp: ICMP):
 def check_port_unreachable(icmp: ICMP):
     return icmp.type == 3 and icmp.code == 3
 
-
+·
 def recv_probe_response(recvsock: util.Socket, ttl: int):
     while recvsock.recv_select():
+        #这个addr可能收到其他主机的icmp响应，所以需要解析，判断是否目的端口返回来的udp包
         packet, addr = recvsock.recvfrom()
         ipv4 = IPv4(packet)
 
@@ -122,12 +123,13 @@ def recv_probe_response(recvsock: util.Socket, ttl: int):
             continue
 
         icmp = ICMP(packet[ipv4.header_len * 4:])
-
+        #判断是不是我们发出的探测包的响应
         if check_ttl_expired(icmp) or check_port_unreachable(icmp):
             # parse the ipv4 header of sender
             ipv4_send = IPv4(packet[ipv4.header_len * 4 + 8:])
             # parse the udp header
             udp = UDP(packet[ipv4.header_len * 4 + 8 + ipv4_send.header_len * 4:])
+            #判断是否目的端口返回来的udp包，才是我们发出的探测包的响应
             if udp.dst_port == TRACEROUTE_PORT_NUMBER:
                 return addr[0]
     return None
