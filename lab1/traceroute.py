@@ -111,7 +111,7 @@ def check_ttl_expired(icmp: ICMP):
 def check_port_unreachable(icmp: ICMP):
     return icmp.type == 3 and icmp.code == 3
 
-·
+
 def recv_probe_response(recvsock: util.Socket, ttl: int):
     while recvsock.recv_select():
         #这个addr可能收到其他主机的icmp响应，所以需要解析，判断是否目的端口返回来的udp包
